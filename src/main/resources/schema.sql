@@ -1,4 +1,5 @@
-CREATE TABLE category
+USE interest_db;
+CREATE TABLE IF NOT EXISTS category
 (
     id          INT AUTO_INCREMENT PRIMARY KEY,
     name        VARCHAR(100) NOT NULL UNIQUE,
@@ -6,7 +7,7 @@ CREATE TABLE category
     description TEXT
 );
 
-CREATE TABLE place (
+CREATE TABLE IF NOT EXISTS place (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     category_id INT NOT NULL,
@@ -18,3 +19,4 @@ CREATE TABLE place (
     updated_at TIMESTAMP DEFAULT  CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (category_id) REFERENCES category(id)
 );
+
