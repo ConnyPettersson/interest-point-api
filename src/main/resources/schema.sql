@@ -20,6 +20,4 @@ CREATE TABLE IF NOT EXISTS place (
     FOREIGN KEY (category_id) REFERENCES category(id)
 );
 
-SELECT CURRENT_USER;
-SHOW GRANTS FOR 'myuser'@'%';
 
