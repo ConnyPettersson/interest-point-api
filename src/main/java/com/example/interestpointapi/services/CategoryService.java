@@ -15,6 +15,10 @@ public class CategoryService {
         this.categoryRepository = categoryRepository;
     }
 
+    public Category saveCategory(Category category) {
+        return categoryRepository.save(category);
+    }
+
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
     }
