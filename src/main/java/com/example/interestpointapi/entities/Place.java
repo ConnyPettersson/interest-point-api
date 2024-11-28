@@ -5,7 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.geolatte.geom.Geometry;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -35,7 +34,7 @@ public class Place {
     @Column
     private String description;
 
-    @Column(columnDefinition = "geometry", nullable = false)
+    @Column(nullable = false, columnDefinition = "geometry")
     private Geometry coordinates;
 
     @Column(name = "created_at", updatable = false)
