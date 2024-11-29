@@ -19,7 +19,7 @@ public class SecurityConfig {
                         .requestMatchers("/categories").permitAll()
                         .anyRequest().authenticated()
                 )
-                .httpBasic(withDefaults()); // Använder en modernare metod
+                .httpBasic(withDefaults());
 
         return http.build();
     }
