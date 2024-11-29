@@ -1,10 +1,13 @@
 package com.example.interestpointapi.entities;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.geolatte.geom.Geometry;
+import org.geolatte.geom.codec.Wkt;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -15,7 +18,7 @@ import java.time.LocalDateTime;
 public class Place {
 
     @Id
-    @GeneratedValue(strategy  = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
     @Column(nullable = false)
@@ -28,19 +31,21 @@ public class Place {
     @Column(name = "user_id", nullable = false)
     private Integer userId;
 
-    @Column(name =  "is_private", nullable = false)
-    private boolean isPrivate  = false;
+    @Column(name = "is_private", nullable = false)
+    @JsonProperty("isPrivate")
+    private boolean isPrivate;
+
 
     @Column
     private String description;
 
     @Column(nullable = false, columnDefinition = "geometry")
-    private Geometry coordinates;
+    private Geometry<?> coordinates;
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_At")
+    @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @PrePersist
@@ -50,7 +55,15 @@ public class Place {
     }
 
     @PreUpdate
-    public void  preUpdate() {
+    public void preUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    public void setCoordinatesFromWkt(String wkt) {
+        try {
+            this.coordinates = Wkt.fromWkt(wkt);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Invalid WKT format for coordinates", e);
+        }
     }
 }
