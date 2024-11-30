@@ -7,6 +7,7 @@ import com.example.interestpointapi.repositories.PlaceRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -47,6 +48,36 @@ public class PlaceService {
     }
 
     public void deletePlaceById(Integer id) {
+        placeRepository.deleteById(id);
+    }
+
+    public Place updatePlace(Integer id, Place updatedPlace) {
+        Place existingPlace = placeRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Place not foung with ID: " + id));
+
+        if (updatedPlace.getName() != null) {
+            existingPlace.setName(updatedPlace.getName());
+        }
+        if (updatedPlace.getDescription() != null) {
+            existingPlace.setDescription(updatedPlace.getDescription());
+        }
+        if (updatedPlace.getCoordinates() != null) {
+            existingPlace.setCoordinates(updatedPlace.getCoordinates());
+        }
+        if (updatedPlace.getCategory() != null && updatedPlace.getCategory().getId() != null) {
+            Category category = categoryRepository.findById(updatedPlace.getCategory().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
+            existingPlace.setCategory(category);
+        }
+        existingPlace.setPrivate(updatedPlace.isPrivate());
+
+        return placeRepository.save(existingPlace);
+    }
+
+    public void deletePlace(Integer id) {
+        if (!placeRepository.existsById(id)) {
+            throw new IllegalArgumentException("Place not found with ID: " + id);
+        }
         placeRepository.deleteById(id);
     }
 }

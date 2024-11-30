@@ -28,4 +28,16 @@ public class PlaceController {
         Place savedPlace = placeService.savePlace(place);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedPlace);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Place> updatePlace(@PathVariable Integer id, @RequestBody Place updatedPlace) {
+        Place savedPlace = placeService.updatePlace(id,updatedPlace);
+        return ResponseEntity.ok(savedPlace);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deletePlace(@PathVariable Integer id) {
+        placeService.deletePlace(id);
+        return ResponseEntity.noContent().build();
+    }
 }
