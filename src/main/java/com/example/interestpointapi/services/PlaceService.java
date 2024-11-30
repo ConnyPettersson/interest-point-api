@@ -4,6 +4,7 @@ import com.example.interestpointapi.entities.Category;
 import com.example.interestpointapi.entities.Place;
 import com.example.interestpointapi.repositories.CategoryRepository;
 import com.example.interestpointapi.repositories.PlaceRepository;
+import org.geolatte.geom.Geometry;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -53,7 +54,7 @@ public class PlaceService {
 
     public Place updatePlace(Integer id, Place updatedPlace) {
         Place existingPlace = placeRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Place not foung with ID: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Place not found with ID: " + id));
 
         if (updatedPlace.getName() != null) {
             existingPlace.setName(updatedPlace.getName());
@@ -62,15 +63,30 @@ public class PlaceService {
             existingPlace.setDescription(updatedPlace.getDescription());
         }
         if (updatedPlace.getCoordinates() != null) {
-            existingPlace.setCoordinates(updatedPlace.getCoordinates());
+            Object coordinates = updatedPlace.getCoordinates();
+            if (coordinates instanceof String) {
+                existingPlace.setCoordinatesFromWkt((String) coordinates);
+            } else if (coordinates instanceof Geometry) {
+                existingPlace.setCoordinates((Geometry) coordinates);
+            } else {
+                throw new IllegalArgumentException("Invalid coordinates format");
+            }
         }
+
+        // Uppdatera kategori om den ändras
         if (updatedPlace.getCategory() != null && updatedPlace.getCategory().getId() != null) {
             Category category = categoryRepository.findById(updatedPlace.getCategory().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
+                    .orElseThrow(() -> new IllegalArgumentException("Category with ID " + updatedPlace.getCategory().getId() + " not found"));
             existingPlace.setCategory(category);
         }
-        existingPlace.setPrivate(updatedPlace.isPrivate());
 
+        // Uppdatera status och användar-id om det skickas
+        existingPlace.setPrivate(updatedPlace.isPrivate());
+        if (updatedPlace.getUserId() != null) {
+            existingPlace.setUserId(updatedPlace.getUserId());
+        }
+
+        // Spara och returnera den uppdaterade platsen
         return placeRepository.save(existingPlace);
     }
 

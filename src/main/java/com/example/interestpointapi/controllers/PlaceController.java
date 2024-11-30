@@ -30,7 +30,9 @@ public class PlaceController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Place> updatePlace(@PathVariable Integer id, @RequestBody Place updatedPlace) {
+    public ResponseEntity<Place> updatePlace(
+            @PathVariable Integer id,
+            @RequestBody Place updatedPlace) {
         Place savedPlace = placeService.updatePlace(id,updatedPlace);
         return ResponseEntity.ok(savedPlace);
     }
