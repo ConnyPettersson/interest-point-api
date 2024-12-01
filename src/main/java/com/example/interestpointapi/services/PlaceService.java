@@ -48,9 +48,6 @@ public class PlaceService {
         return placeRepository.findById(id);
     }
 
-    public void deletePlaceById(Integer id) {
-        placeRepository.deleteById(id);
-    }
 
     public Place updatePlace(Integer id, Place updatedPlace) {
         Place existingPlace = placeRepository.findById(id)
@@ -73,27 +70,29 @@ public class PlaceService {
             }
         }
 
-        // Uppdatera kategori om den ändras
+
         if (updatedPlace.getCategory() != null && updatedPlace.getCategory().getId() != null) {
             Category category = categoryRepository.findById(updatedPlace.getCategory().getId())
                     .orElseThrow(() -> new IllegalArgumentException("Category with ID " + updatedPlace.getCategory().getId() + " not found"));
             existingPlace.setCategory(category);
         }
 
-        // Uppdatera status och användar-id om det skickas
+
         existingPlace.setPrivate(updatedPlace.isPrivate());
         if (updatedPlace.getUserId() != null) {
             existingPlace.setUserId(updatedPlace.getUserId());
         }
 
-        // Spara och returnera den uppdaterade platsen
+
         return placeRepository.save(existingPlace);
     }
 
-    public void deletePlace(Integer id) {
-        if (!placeRepository.existsById(id)) {
-            throw new IllegalArgumentException("Place not found with ID: " + id);
+
+    public void deletePlaceById(Integer id) {
+        if (placeRepository.existsById(id)) {
+            placeRepository.deleteById(id);
+        } else {
+            throw new IllegalArgumentException("Place with ID " + id + " not found!");
         }
-        placeRepository.deleteById(id);
     }
 }

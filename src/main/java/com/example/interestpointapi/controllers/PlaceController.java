@@ -39,7 +39,7 @@ public class PlaceController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deletePlace(@PathVariable Integer id) {
-        placeService.deletePlace(id);
+        placeService.deletePlaceById(id);
         return ResponseEntity.noContent().build();
     }
 }
