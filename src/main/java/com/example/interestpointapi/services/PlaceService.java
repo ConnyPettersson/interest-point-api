@@ -6,9 +6,7 @@ import com.example.interestpointapi.repositories.CategoryRepository;
 import com.example.interestpointapi.repositories.PlaceRepository;
 import org.geolatte.geom.Geometry;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -94,5 +92,9 @@ public class PlaceService {
         } else {
             throw new IllegalArgumentException("Place with ID " + id + " not found!");
         }
+    }
+
+    public List<Place> getPlacesByPrivacy(Boolean isPrivate) {
+        return placeRepository.findByIsPrivate(isPrivate);
     }
 }

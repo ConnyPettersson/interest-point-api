@@ -23,6 +23,12 @@ public class PlaceController {
         return placeService.getAllPlaces();
     }
 
+    @GetMapping("/filter")
+    public ResponseEntity<List<Place>> getPlacesByPrivacy(@RequestParam("isPrivate") Boolean isPrivate) {
+        List<Place> privatePlaces = placeService.getPlacesByPrivacy(isPrivate);
+        return ResponseEntity.ok(privatePlaces);
+    }
+
     @PostMapping
     public ResponseEntity<Place> createPlace(@RequestBody Place place) {
         Place savedPlace = placeService.savePlace(place);
