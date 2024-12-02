@@ -20,4 +20,5 @@ CREATE TABLE IF NOT EXISTS place (
     FOREIGN KEY (category_id) REFERENCES category(id)
 );
 
+SELECT * FROM category WHERE id = 1;
 

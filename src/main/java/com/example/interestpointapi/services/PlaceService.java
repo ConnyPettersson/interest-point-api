@@ -97,4 +97,12 @@ public class PlaceService {
     public List<Place> getPlacesByPrivacy(Boolean isPrivate) {
         return placeRepository.findByIsPrivate(isPrivate);
     }
+
+    public List<Place> getPublicPlacesByCategory(Category category) {
+        return placeRepository.findByIsPrivateFalseAndCategory(category);
+    }
+
+    public Optional<Category> getCategoryById(Integer id) {
+        return categoryRepository.findById(id);
+    }
 }

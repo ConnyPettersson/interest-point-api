@@ -1,5 +1,6 @@
 package com.example.interestpointapi.controllers;
 
+import com.example.interestpointapi.entities.Category;
 import com.example.interestpointapi.entities.Place;
 import com.example.interestpointapi.services.PlaceService;
 import org.springframework.http.HttpStatus;
@@ -7,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/places")
@@ -29,6 +31,15 @@ public class PlaceController {
         return ResponseEntity.ok(privatePlaces);
     }
 
+    @GetMapping("/category/{id}")
+    public ResponseEntity<List<Place>> getPublicPlacesByCategory(@PathVariable Integer id) {
+       Category category = placeService.getCategoryById(id)
+               .orElseThrow(() -> new IllegalArgumentException("Category with ID " + id + " not found!"));
+
+       List<Place> publicPlaces = placeService.getPublicPlacesByCategory(category);
+       return ResponseEntity.ok(publicPlaces);
+    }
+
     @PostMapping
     public ResponseEntity<Place> createPlace(@RequestBody Place place) {
         Place savedPlace = placeService.savePlace(place);
@@ -48,4 +59,6 @@ public class PlaceController {
         placeService.deletePlaceById(id);
         return ResponseEntity.noContent().build();
     }
+
+
 }
