@@ -109,4 +109,11 @@ public class PlaceService {
     public List<Place> getPlacesByUserId(Integer userId) {
         return placeRepository.findByUserId(userId);
     }
+
+    public List<Place> getPlacesWithinArea(Geometry area) {
+        if (area == null) {
+            throw new IllegalArgumentException("Area cannot be null");
+        }
+        return placeRepository.findByCoordinatesWithin(area);
+    }
 }

@@ -3,6 +3,7 @@ package com.example.interestpointapi.controllers;
 import com.example.interestpointapi.entities.Category;
 import com.example.interestpointapi.entities.Place;
 import com.example.interestpointapi.services.PlaceService;
+import org.geolatte.geom.Geometry;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -46,6 +47,16 @@ public class PlaceController {
         return ResponseEntity.ok(userPlaces);
     }
 
+    @GetMapping("/area")
+    public ResponseEntity <List<Place>> getPlacesWithinAreas(@RequestBody Geometry area) {
+        if (area == null) {
+            throw new IllegalArgumentException("Area cannot be null");
+        }
+
+        List<Place> places = placeService.getPlacesWithinArea(area);
+        return ResponseEntity.ok(places);
+    }
+
     @PostMapping
     public ResponseEntity<Place> createPlace(@RequestBody Place place) {
         Place savedPlace = placeService.savePlace(place);
@@ -65,6 +76,4 @@ public class PlaceController {
         placeService.deletePlaceById(id);
         return ResponseEntity.noContent().build();
     }
-
-
 }
