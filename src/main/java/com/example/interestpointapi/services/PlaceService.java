@@ -105,4 +105,8 @@ public class PlaceService {
     public Optional<Category> getCategoryById(Integer id) {
         return categoryRepository.findById(id);
     }
+
+    public List<Place> getPlacesByUserId(Integer userId) {
+        return placeRepository.findByUserId(userId);
+    }
 }

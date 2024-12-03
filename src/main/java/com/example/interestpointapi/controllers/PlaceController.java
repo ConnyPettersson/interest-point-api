@@ -40,6 +40,12 @@ public class PlaceController {
        return ResponseEntity.ok(publicPlaces);
     }
 
+    @GetMapping("/users/{userId}")
+    public ResponseEntity <List<Place>> getPlacesByUserId(@PathVariable Integer userId) {
+        List<Place> userPlaces = placeService.getPlacesByUserId(userId);
+        return ResponseEntity.ok(userPlaces);
+    }
+
     @PostMapping
     public ResponseEntity<Place> createPlace(@RequestBody Place place) {
         Place savedPlace = placeService.savePlace(place);

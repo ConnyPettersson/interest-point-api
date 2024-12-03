@@ -9,4 +9,5 @@ import java.util.List;
 public interface PlaceRepository extends JpaRepository<Place, Integer> {
     List<Place> findByIsPrivate(Boolean isPrivate);
     List<Place> findByIsPrivateFalseAndCategory(Category category);
+    List<Place> findByUserId(Integer userId);
 }
