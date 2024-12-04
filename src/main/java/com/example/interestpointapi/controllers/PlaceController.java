@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
@@ -56,6 +57,16 @@ public class PlaceController {
         List<Place> places = placeService.getPlacesWithinArea(area);
         return ResponseEntity.ok(places);
     }
+
+    @GetMapping("/my-places")
+    public ResponseEntity<List<Place>> getMyPlaces(Principal principal) {
+        //Integer userId = Integer.parseInt(principal.getName());
+        Integer userId = 1;
+        List<Place> myPlaces = placeService.getPlacesByUserId(userId);
+        return ResponseEntity.ok(myPlaces);
+    }
+
+
 
     @PostMapping
     public ResponseEntity<Place> createPlace(@RequestBody Place place) {
