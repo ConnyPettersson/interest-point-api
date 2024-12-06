@@ -2,6 +2,7 @@ package com.example.interestpointapi.controllers;
 
 import com.example.interestpointapi.entities.Category;
 import com.example.interestpointapi.entities.Place;
+import com.example.interestpointapi.repositories.UserRepository;
 import com.example.interestpointapi.services.PlaceService;
 import org.geolatte.geom.Geometry;
 import org.springframework.http.HttpStatus;
@@ -17,9 +18,11 @@ import java.util.Optional;
 
 public class PlaceController {
     private final PlaceService placeService;
+    private final UserRepository userRepository;
 
-    public PlaceController(PlaceService placeService) {
+    public PlaceController(PlaceService placeService, UserRepository userRepository) {
         this.placeService = placeService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
@@ -67,8 +70,10 @@ public class PlaceController {
 
     @GetMapping("/my-places")
     public ResponseEntity<List<Place>> getMyPlaces(Principal principal) {
-        //Integer userId = Integer.parseInt(principal.getName());
-        Integer userId = 1;
+        String username = principal.getName();
+        Integer userId = userRepository.findByUsername(username)
+                .orElseThrow(() -> new IllegalArgumentException("User with username " + username + " notfound!"))
+                .getId();
         List<Place> myPlaces = placeService.getPlacesByUserId(userId);
         return ResponseEntity.ok(myPlaces);
     }

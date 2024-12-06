@@ -20,5 +20,16 @@ CREATE TABLE IF NOT EXISTS place (
     FOREIGN KEY (category_id) REFERENCES category(id)
 );
 
+CREATE TABLE IF NOT EXISTS users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(100) NOT NULL
+);
+
+UPDATE users
+SET password = '$2a$10$ByhcU7MNRigZMOYjSJGfnuKPk63oATRwmNxypCogEy02YfsW7EbGS'
+WHERE username = 'user';
+
 SELECT * FROM category WHERE id = 1;
 
+SELECT * FROM users WHERE username = 'user';
