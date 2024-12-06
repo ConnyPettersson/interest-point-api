@@ -5,6 +5,7 @@ import com.example.interestpointapi.services.CategoryService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -20,6 +21,13 @@ public class CategoryController {
     @GetMapping
     public List<Category> getAllCategories() {
         return categoryService.getAllCategories();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Category> getCategoryById(@PathVariable Integer id) {
+        Category category = categoryService.getCategoryById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category with ID " + id + " not found!"));
+        return ResponseEntity.ok(category);
     }
 
     @PostMapping

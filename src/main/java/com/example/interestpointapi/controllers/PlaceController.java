@@ -27,6 +27,13 @@ public class PlaceController {
         return placeService.getAllPlaces();
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<Place> getPlaceById(@PathVariable Integer id) {
+        Place place = placeService.getPlaceById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Place with ID " + id + " not found!"));
+        return ResponseEntity.ok(place);
+    }
+
     @GetMapping("/filter")
     public ResponseEntity<List<Place>> getPlacesByPrivacy(@RequestParam("isPrivate") Boolean isPrivate) {
         List<Place> privatePlaces = placeService.getPlacesByPrivacy(isPrivate);

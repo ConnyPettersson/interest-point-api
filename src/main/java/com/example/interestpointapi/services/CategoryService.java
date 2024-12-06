@@ -5,6 +5,7 @@ import com.example.interestpointapi.repositories.CategoryRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CategoryService {
@@ -21,5 +22,9 @@ public class CategoryService {
 
     public List<Category> getAllCategories() {
         return categoryRepository.findAll();
+    }
+
+    public Optional<Category> getCategoryById(Integer id) {
+        return categoryRepository.findById(id);
     }
 }
