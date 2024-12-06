@@ -34,7 +34,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/categories").hasRole("ADMIN")
                         .requestMatchers("/places/my-places").hasRole("USER")
-                        .requestMatchers("/places/**").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/places/**").authenticated()
+                        .requestMatchers("/places/filter").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)

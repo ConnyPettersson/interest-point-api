@@ -38,7 +38,15 @@ public class PlaceController {
     }
 
     @GetMapping("/filter")
-    public ResponseEntity<List<Place>> getPlacesByPrivacy(@RequestParam("isPrivate") Boolean isPrivate) {
+    public ResponseEntity<List<Place>> getPlacesByPrivacy(@RequestParam(required = false) Boolean isPrivate, Principal principal) {
+        if (isPrivate == null) {
+            throw new IllegalArgumentException("The 'isPrivate' parameter is required!");
+        }
+
+        if (isPrivate && principal == null) {
+            throw new IllegalArgumentException("You must be logged in to access private places!");
+        }
+
         List<Place> privatePlaces = placeService.getPlacesByPrivacy(isPrivate);
         return ResponseEntity.ok(privatePlaces);
     }
@@ -54,6 +62,8 @@ public class PlaceController {
 
     @GetMapping("/users/{userId}")
     public ResponseEntity <List<Place>> getPlacesByUserId(@PathVariable Integer userId) {
+        userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User with ID " + userId + " not found!"));
         List<Place> userPlaces = placeService.getPlacesByUserId(userId);
         return ResponseEntity.ok(userPlaces);
     }
@@ -61,7 +71,7 @@ public class PlaceController {
     @GetMapping("/area")
     public ResponseEntity <List<Place>> getPlacesWithinAreas(@RequestBody Geometry area) {
         if (area == null) {
-            throw new IllegalArgumentException("Area cannot be null");
+            throw new IllegalArgumentException("Area cannot be null!");
         }
 
         List<Place> places = placeService.getPlacesWithinArea(area);
