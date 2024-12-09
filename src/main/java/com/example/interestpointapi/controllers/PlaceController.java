@@ -4,14 +4,16 @@ import com.example.interestpointapi.entities.Category;
 import com.example.interestpointapi.entities.Place;
 import com.example.interestpointapi.repositories.UserRepository;
 import com.example.interestpointapi.services.PlaceService;
-import org.geolatte.geom.Geometry;
+import com.example.interestpointapi.validation.OnCreate;
+import com.example.interestpointapi.validation.OnUpdate;
+import jakarta.validation.Valid;
+import org.geolatte.geom.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import java.security.Principal;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/places")
@@ -69,14 +71,27 @@ public class PlaceController {
     }
 
     @GetMapping("/area")
-    public ResponseEntity <List<Place>> getPlacesWithinAreas(@RequestBody Geometry area) {
+    public ResponseEntity<List<Place>> getPlacesWithinArea(@RequestBody Geometry area) {
         if (area == null) {
-            throw new IllegalArgumentException("Area cannot be null!");
+            throw new IllegalArgumentException("Area cannot be null");
         }
-
         List<Place> places = placeService.getPlacesWithinArea(area);
         return ResponseEntity.ok(places);
     }
+
+    @GetMapping("/radius")
+    public ResponseEntity<List<Place>> getPlacesWithinRadius(
+            @RequestParam double latitude,
+            @RequestParam double longitude,
+            @RequestParam double radius) {
+        if (radius <= 0) {
+            throw new IllegalArgumentException("Radius must be greater than 0");
+        }
+        List<Place> places = placeService.getPlacesWithinRadius(latitude, longitude, radius);
+        return ResponseEntity.ok(places);
+    }
+
+
 
     @GetMapping("/my-places")
     public ResponseEntity<List<Place>> getMyPlaces(Principal principal) {
@@ -90,18 +105,30 @@ public class PlaceController {
 
 
 
-    @PostMapping
-    public ResponseEntity<Place> createPlace(@RequestBody Place place) {
-        Place savedPlace = placeService.savePlace(place);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedPlace);
+    @PostMapping(consumes = "application/json", produces = "application/json")
+    public ResponseEntity<Place> createPlace(@RequestBody @Validated(OnCreate.class) Place place) {
+        try {
+            Place savedPlace = placeService.savePlace(place);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedPlace);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Place> updatePlace(
             @PathVariable Integer id,
-            @RequestBody Place updatedPlace) {
-        Place savedPlace = placeService.updatePlace(id,updatedPlace);
-        return ResponseEntity.ok(savedPlace);
+            @RequestBody @Validated(OnUpdate.class) Place updatedPlace) {
+        try {
+            Place savedPlace = placeService.updatePlace(id, updatedPlace);
+            return ResponseEntity.ok(savedPlace);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(null);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -110,3 +137,5 @@ public class PlaceController {
         return ResponseEntity.noContent().build();
     }
 }
+
+

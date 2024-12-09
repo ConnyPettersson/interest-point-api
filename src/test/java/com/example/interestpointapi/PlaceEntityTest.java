@@ -44,7 +44,7 @@ public class PlaceEntityTest {
 
         String wellKnownText = "POINT(12.34 56.78)";
         Point<?> coordinates = (Point<?>) Wkt.fromWkt(wellKnownText);
-        place.setCoordinates(coordinates);
+        place.setCoordinates(String.valueOf(coordinates));
 
 
         entityManager.persist(place);

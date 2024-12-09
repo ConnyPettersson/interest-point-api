@@ -4,10 +4,13 @@ import com.example.interestpointapi.entities.Category;
 import com.example.interestpointapi.entities.Place;
 import com.example.interestpointapi.repositories.CategoryRepository;
 import com.example.interestpointapi.repositories.PlaceRepository;
-import org.geolatte.geom.Geometry;
+import org.geolatte.geom.*;
+import org.geolatte.geom.crs.CoordinateReferenceSystems;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
+import org.geolatte.geom.Point;
+import org.geolatte.geom.builder.DSL;
 
 @Service
 public class PlaceService {
@@ -54,36 +57,33 @@ public class PlaceService {
         if (updatedPlace.getName() != null) {
             existingPlace.setName(updatedPlace.getName());
         }
+
         if (updatedPlace.getDescription() != null) {
             existingPlace.setDescription(updatedPlace.getDescription());
         }
+
         if (updatedPlace.getCoordinates() != null) {
             Object coordinates = updatedPlace.getCoordinates();
             if (coordinates instanceof String) {
-                existingPlace.setCoordinatesFromWkt((String) coordinates);
-            } else if (coordinates instanceof Geometry) {
-                existingPlace.setCoordinates((Geometry) coordinates);
+                existingPlace.setCoordinates((String) coordinates);
+            } else if (coordinates instanceof Point) {
+                existingPlace.setCoordinates(coordinates.toString());
             } else {
                 throw new IllegalArgumentException("Invalid coordinates format");
             }
         }
 
-
-        if (updatedPlace.getCategory() != null && updatedPlace.getCategory().getId() != null) {
-            Category category = categoryRepository.findById(updatedPlace.getCategory().getId())
-                    .orElseThrow(() -> new IllegalArgumentException("Category with ID " + updatedPlace.getCategory().getId() + " not found"));
-            existingPlace.setCategory(category);
+        if (updatedPlace.getCategory() != null) {
+            existingPlace.setCategory(updatedPlace.getCategory());
         }
 
-
-        existingPlace.setPrivate(updatedPlace.isPrivate());
         if (updatedPlace.getUserId() != null) {
             existingPlace.setUserId(updatedPlace.getUserId());
         }
-
-
         return placeRepository.save(existingPlace);
     }
+
+
 
 
     public void deletePlaceById(Integer id) {
@@ -116,4 +116,15 @@ public class PlaceService {
         }
         return placeRepository.findByCoordinatesWithin(area);
     }
+
+    public List<Place> getPlacesWithinRadius(double latitude, double longitude, double radius) {
+
+        var crs = CoordinateReferenceSystems.WGS84;
+
+        Point<G2D> center = DSL.point(crs, DSL.g(longitude, latitude));
+
+        return placeRepository.findByCoordinatesWithinRadius(center, radius);
+    }
+
+
 }
