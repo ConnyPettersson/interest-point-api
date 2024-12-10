@@ -1,5 +1,6 @@
 package com.example.interestpointapi;
 
+import com.example.interestpointapi.dto.PlaceDTO;
 import com.example.interestpointapi.entities.Category;
 import com.example.interestpointapi.entities.Place;
 import jakarta.persistence.EntityManager;
@@ -22,12 +23,12 @@ public class PlaceEntityTest {
 
     @Test
     void testPlaceEntityPersistence() {
-
+        PlaceDTO placeDTO = new PlaceDTO();
         entityManager.createQuery("DELETE FROM Place").executeUpdate();
         entityManager.createQuery("DELETE FROM Category").executeUpdate();
 
 
-        Category category = new Category();
+        Category category = new Category(placeDTO.getCategoryId());
         category.setName("Test Category");
         category.setSymbol("⭐");
         category.setDescription("A category for testing");

@@ -5,36 +5,42 @@ import com.example.interestpointapi.entities.Place;
 import com.example.interestpointapi.repositories.CategoryRepository;
 import com.example.interestpointapi.repositories.PlaceRepository;
 import org.geolatte.geom.*;
+import org.geolatte.geom.Point;
+import org.geolatte.geom.builder.DSL;
 import org.geolatte.geom.crs.CoordinateReferenceSystems;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
-import org.geolatte.geom.Point;
-import org.geolatte.geom.builder.DSL;
+
 
 @Service
 public class PlaceService {
-
+    private static final Logger logger = LoggerFactory.getLogger(PlaceService.class);
     private final PlaceRepository placeRepository;
     private final CategoryRepository categoryRepository;
 
+    @Autowired
     public PlaceService(PlaceRepository placeRepository, CategoryRepository categoryRepository) {
         this.placeRepository = placeRepository;
         this.categoryRepository = categoryRepository;
     }
 
     public Place savePlace(Place place) {
-
         if (place.getCategory() != null && place.getCategory().getId() != null) {
             Category category = categoryRepository.findById(place.getCategory().getId())
                     .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
             place.setCategory(category);
         }
 
-        Object coordinates = place.getCoordinates();
-        if (coordinates == null) {
+        if (place.getUserId() == null) {
+            throw new IllegalArgumentException("User ID must not be null");
+        }
 
-            throw new IllegalArgumentException("Coordinates must be either a valid WKT String or Geometry.");
+        if (place.getCoordinates() == null) {
+            throw new IllegalArgumentException("Coordinates must be a valid WKT string");
         }
 
         return placeRepository.save(place);
@@ -49,14 +55,30 @@ public class PlaceService {
         return placeRepository.findById(id);
     }
 
+    public List<Place> getPlacesWithinRadius(double latitude, double longitude, double radius) {
+        if (radius <= 0) {
+            throw new IllegalArgumentException("Radius must be greater than 0");
+        }
+        var crs = CoordinateReferenceSystems.WGS84;
+        Point<G2D> center = DSL.point(crs, DSL.g(longitude, latitude));
+        if (center.getSRID() == 0) {
+            center = DSL.point(CoordinateReferenceSystems.WGS84, center.getPosition());
+        }
+        return placeRepository.findByCoordinatesWithinRadius(center, radius);
+    }
+
+
 
     public Place updatePlace(Integer id, Place updatedPlace) {
+
         Place existingPlace = placeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Place not found with ID: " + id));
+
 
         if (updatedPlace.getName() != null) {
             existingPlace.setName(updatedPlace.getName());
         }
+
 
         if (updatedPlace.getDescription() != null) {
             existingPlace.setDescription(updatedPlace.getDescription());
@@ -73,15 +95,13 @@ public class PlaceService {
             }
         }
 
-        if (updatedPlace.getCategory() != null) {
-            existingPlace.setCategory(updatedPlace.getCategory());
-        }
-
-        if (updatedPlace.getUserId() != null) {
-            existingPlace.setUserId(updatedPlace.getUserId());
-        }
         return placeRepository.save(existingPlace);
     }
+
+
+
+
+
 
 
 
@@ -110,21 +130,18 @@ public class PlaceService {
         return placeRepository.findByUserId(userId);
     }
 
-    public List<Place> getPlacesWithinArea(Geometry area) {
+    public List<Place> getPlacesWithinArea(Geometry<?> area) {
+        logger.debug("Received area for query: {}", area);
         if (area == null) {
+            logger.error("Area is null!");
             throw new IllegalArgumentException("Area cannot be null");
         }
-        return placeRepository.findByCoordinatesWithin(area);
+        if (area.getSRID() != 4326) {
+            logger.error("Invalid SRID: {}", area.getSRID());
+            throw new IllegalArgumentException("Area SRID must be 4326");
+        }
+        List<Place> places = placeRepository.findByCoordinatesWithin(area);
+        logger.debug("Found places within area: {}", places);
+        return places;
     }
-
-    public List<Place> getPlacesWithinRadius(double latitude, double longitude, double radius) {
-
-        var crs = CoordinateReferenceSystems.WGS84;
-
-        Point<G2D> center = DSL.point(crs, DSL.g(longitude, latitude));
-
-        return placeRepository.findByCoordinatesWithinRadius(center, radius);
-    }
-
-
 }

@@ -27,4 +27,8 @@ public class Category {
 
     @Size(max = 500, message = "Description must be less than 500 characters")
     private String description;
+
+    public Category(Integer id) {
+        this.id = id;
+    }
 }
