@@ -7,6 +7,13 @@ CREATE TABLE IF NOT EXISTS category
     description TEXT
 );
 
+CREATE TABLE IF NOT EXISTS users (
+                                     id INT AUTO_INCREMENT PRIMARY KEY,
+                                     username VARCHAR(100) NOT NULL UNIQUE,
+                                     password VARCHAR(100) NOT NULL
+);
+
+
 CREATE TABLE IF NOT EXISTS place (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -20,11 +27,9 @@ CREATE TABLE IF NOT EXISTS place (
     FOREIGN KEY (category_id) REFERENCES category(id)
 );
 
-CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(100) NOT NULL
-);
+SHOW DATABASES;
+SHOW TABLES;
+
 
 UPDATE users
 SET password = '$2a$10$ByhcU7MNRigZMOYjSJGfnuKPk63oATRwmNxypCogEy02YfsW7EbGS'
