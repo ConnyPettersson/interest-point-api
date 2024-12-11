@@ -23,6 +23,5 @@ VALUES
 INSERT INTO place (name, category_id, user_id, is_private, description, coordinates)
 VALUES ('Test PlaceX', 1, (SELECT id FROM users WHERE username = 'test_userX'), FALSE, 'Test descriptionX', ST_GeomFromText('POINT(10.0 20.0)', 4326));
 
--- Exempel på en plats med ogiltig user_id (finns ej i users-tabellen)
 INSERT INTO place (name, category_id, user_id, is_private, description, coordinates)
 VALUES ('Invalid Place', 1, 9999, FALSE, 'Invalid user', ST_GeomFromText('POINT(30.0 50.0)', 4326));
