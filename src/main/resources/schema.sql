@@ -7,6 +7,13 @@ CREATE TABLE IF NOT EXISTS category
     description TEXT
 );
 
+CREATE TABLE IF NOT EXISTS users (
+                                     id INT AUTO_INCREMENT PRIMARY KEY,
+                                     username VARCHAR(100) NOT NULL UNIQUE,
+                                     password VARCHAR(100) NOT NULL
+);
+
+
 CREATE TABLE IF NOT EXISTS place (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -21,11 +28,9 @@ CREATE TABLE IF NOT EXISTS place (
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
 
-CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(100) NOT NULL
-);
+SHOW DATABASES;
+SHOW TABLES;
+
 
 SELECT *
 FROM place

@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+import java.util.List;
 
 @Component
 public class JwtUtil {
@@ -22,10 +23,11 @@ public class JwtUtil {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String generateToken(String username) {
-        long expirationTime = 86400000; // 1 dag i millisekunder
+    public String generateToken(String username, List<String> authorities) {
+        long expirationTime = 86400000;
         return Jwts.builder()
                 .setSubject(username)
+                .claim("roles", authorities)
                 .setIssuedAt(new Date())
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -48,5 +50,14 @@ public class JwtUtil {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    public List<String> extractRoles(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("roles", List.class);
     }
 }
