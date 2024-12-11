@@ -55,17 +55,7 @@ public class PlaceService {
         return placeRepository.findById(id);
     }
 
-    public List<Place> getPlacesWithinRadius(double latitude, double longitude, double radius) {
-        if (radius <= 0) {
-            throw new IllegalArgumentException("Radius must be greater than 0");
-        }
-        var crs = CoordinateReferenceSystems.WGS84;
-        Point<G2D> center = DSL.point(crs, DSL.g(longitude, latitude));
-        if (center.getSRID() == 0) {
-            center = DSL.point(CoordinateReferenceSystems.WGS84, center.getPosition());
-        }
-        return placeRepository.findByCoordinatesWithinRadius(center, radius);
-    }
+
 
 
 
@@ -140,7 +130,15 @@ public class PlaceService {
             logger.error("Invalid SRID: {}", area.getSRID());
             throw new IllegalArgumentException("Area SRID must be 4326");
         }
-        List<Place> places = placeRepository.findByCoordinatesWithin(area);
+        String wktPolygon = area.toString();
+// Ta bort "SRID=4326;" om den finns
+        if (wktPolygon.startsWith("SRID=4326;")) {
+            wktPolygon = wktPolygon.substring("SRID=4326;".length());
+        }
+
+// Nu anropar du native query
+        List<Place> places = placeRepository.findByCoordinatesWithinNative(wktPolygon);
+
         logger.debug("Found places within area: {}", places);
         return places;
     }

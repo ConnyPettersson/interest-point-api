@@ -1,15 +1,14 @@
 package com.example.interestpointapi.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.geolatte.geom.crs.CoordinateReferenceSystems;
 import org.geolatte.geom.G2D;
-import org.geolatte.geom.Point;
+import org.geolatte.geom.codec.Wkt;
 import com.example.interestpointapi.dto.PlaceDTO;
 import com.example.interestpointapi.entities.Category;
 import com.example.interestpointapi.entities.Place;
 import com.example.interestpointapi.repositories.CategoryRepository;
 import com.example.interestpointapi.repositories.UserRepository;
 import com.example.interestpointapi.services.PlaceService;
-import org.geolatte.geom.builder.DSL;
+import org.geolatte.geom.crs.CoordinateReferenceSystems;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import jakarta.validation.Valid;
@@ -22,6 +21,8 @@ import org.geolatte.geom.Geometry;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
+import java.util.Locale;
+
 import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
@@ -86,37 +87,79 @@ public class PlaceController {
     }
 
     @GetMapping("/area")
-    public ResponseEntity<List<Place>> getPlacesWithinArea(@RequestBody String geoJson) {
-        try {
-            Geometry<?> area = objectMapper.readValue(geoJson, Geometry.class);
-            logger.debug("Received GeoJSON for area: {}", area);
-            List<Place> places = placeService.getPlacesWithinArea(area);
-            logger.debug("Places found within area: {}", places);
-            return ResponseEntity.ok(places);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid GeoJSON format: " + e.getMessage(), e);
+    public ResponseEntity<List<Place>> getPlacesWithinRectangle(
+            @RequestParam Double minLat,
+            @RequestParam Double minLon,
+            @RequestParam Double maxLat,
+            @RequestParam Double maxLon) {
+
+        if (minLat == null || maxLat == null || minLon == null || maxLon == null) {
+            return ResponseEntity.badRequest().build();
         }
+
+        if (minLat >= maxLat || minLon >= maxLon) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        String wkt = String.format(Locale.US,
+                "POLYGON((%f %f, %f %f, %f %f, %f %f, %f %f))",
+                minLon, minLat,
+                minLon, maxLat,
+                maxLon, maxLat,
+                maxLon, minLat,
+                minLon, minLat
+        );
+        System.out.println("wkt is: " + wkt);
+        Geometry<G2D> area = Wkt.fromWkt(wkt, CoordinateReferenceSystems.WGS84);
+
+        List<Place> places = placeService.getPlacesWithinArea(area);
+        return ResponseEntity.ok(places);
     }
 
+    @GetMapping("/area/circle")
+    public ResponseEntity<List<Place>> getPlacesWithinCircle(
+            @RequestParam Double centerLat,
+            @RequestParam Double centerLon,
+            @RequestParam Double radiusKm) {
 
-    @GetMapping("/radius")
-    public ResponseEntity<List<Place>> getPlacesWithinRadius(
-            @RequestParam double latitude,
-            @RequestParam double longitude,
-            @RequestParam double radius) {
-        try {
-            if (radius <= 0) {
-                throw new IllegalArgumentException("Radius must be greater than 0");
+        // Validering
+        if (centerLat == null || centerLon == null || radiusKm == null || radiusKm <= 0) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        // Konvertera radius i km till grader lat/lon
+        double latDegreePerKm = 1.0 / 111.0; // ca 1 grad per 111 km lat
+        double lonDegreePerKm = 1.0 / (111.0 * Math.cos(Math.toRadians(centerLat)));
+
+        double latRadiusDegrees = radiusKm * latDegreePerKm;
+        double lonRadiusDegrees = radiusKm * lonDegreePerKm;
+
+        // Skapa polygonen utifrån N punkter
+        int numPoints = 32; // antal punkter för att approximera cirkeln
+        StringBuilder wktBuilder = new StringBuilder("POLYGON((");
+
+        for (int i = 0; i < numPoints; i++) {
+            double angle = 2 * Math.PI * i / numPoints;
+            double lat = centerLat + Math.sin(angle) * latRadiusDegrees;
+            double lon = centerLon + Math.cos(angle) * lonRadiusDegrees;
+
+            wktBuilder.append(lon).append(" ").append(lat);
+            if (i < numPoints - 1) {
+                wktBuilder.append(", ");
             }
-            List<Place> places = placeService.getPlacesWithinRadius(latitude, longitude, radius);
-            return ResponseEntity.ok(places);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Error in radius query: " + e.getMessage(), e);
         }
+        // Avsluta polygonen genom att återgå till startpunkten
+        wktBuilder.append(", ")
+                .append((centerLon + Math.cos(0) * lonRadiusDegrees)).append(" ")
+                .append((centerLat + Math.sin(0) * latRadiusDegrees))
+                .append("))");
+
+        String wkt = wktBuilder.toString();
+        Geometry<G2D> area = Wkt.fromWkt(wkt, CoordinateReferenceSystems.WGS84);
+
+        List<Place> places = placeService.getPlacesWithinArea(area);
+        return ResponseEntity.ok(places);
     }
-
-
-
 
 
     @GetMapping("/my-places")
@@ -128,7 +171,6 @@ public class PlaceController {
         List<Place> myPlaces = placeService.getPlacesByUserId(userId);
         return ResponseEntity.ok(myPlaces);
     }
-
 
 
     @PostMapping(consumes = "application/json", produces = "application/json")
