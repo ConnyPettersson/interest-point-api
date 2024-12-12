@@ -1,4 +1,6 @@
 package com.example.interestpointapi.controllers;
+import com.example.interestpointapi.validation.CreateValidation;
+import com.example.interestpointapi.validation.UpdateValidation;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.geolatte.geom.G2D;
 import org.geolatte.geom.codec.Wkt;
@@ -18,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.geolatte.geom.Geometry;
 
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
 import java.util.List;
@@ -174,9 +177,7 @@ public class PlaceController {
 
 
     @PostMapping(consumes = "application/json", produces = "application/json")
-    public ResponseEntity<Place> createPlace(@RequestBody @Valid PlaceDTO placeDTO) {
-
-        logger.debug("Coordinates received: {}", placeDTO.getCoordinates());
+    public ResponseEntity<Place> createPlace(@RequestBody @Validated(CreateValidation.class) PlaceDTO placeDTO) {
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
@@ -204,7 +205,7 @@ public class PlaceController {
     @PutMapping("/{id}")
     public ResponseEntity<Place> updatePlace(
             @PathVariable Integer id,
-            @RequestBody @Valid PlaceDTO placeDTO) {
+            @RequestBody @Validated(UpdateValidation.class) PlaceDTO placeDTO) {
         logger.debug("Coordinates received: {}", placeDTO.getCoordinates());
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
