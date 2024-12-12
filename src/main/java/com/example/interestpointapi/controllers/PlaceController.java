@@ -195,7 +195,6 @@ public class PlaceController {
         if (placeDTO.getCoordinates() != null) {
             place.setCoordinates(placeDTO.getCoordinates()); // Detta anropar setCoordinates(String wkt)
         }
-
         Place savedPlace = placeService.savePlace(place);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedPlace);
     }
