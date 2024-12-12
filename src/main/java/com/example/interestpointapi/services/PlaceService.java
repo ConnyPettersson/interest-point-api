@@ -6,8 +6,6 @@ import com.example.interestpointapi.repositories.CategoryRepository;
 import com.example.interestpointapi.repositories.PlaceRepository;
 import org.geolatte.geom.*;
 import org.geolatte.geom.Point;
-import org.geolatte.geom.builder.DSL;
-import org.geolatte.geom.crs.CoordinateReferenceSystems;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +46,6 @@ public class PlaceService {
         return placeRepository.save(place);
     }
 
-
     public List<Place> getAllPlaces() {
         return placeRepository.findAll();
     }
@@ -61,20 +58,14 @@ public class PlaceService {
         return placeRepository.findById(id);
     }
 
-
-
-
-
     public Place updatePlace(Integer id, Place updatedPlace) {
 
         Place existingPlace = placeRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Place not found with ID: " + id));
 
-
         if (updatedPlace.getName() != null) {
             existingPlace.setName(updatedPlace.getName());
         }
-
 
         if (updatedPlace.getDescription() != null) {
             existingPlace.setDescription(updatedPlace.getDescription());
