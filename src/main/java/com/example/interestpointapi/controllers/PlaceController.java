@@ -29,7 +29,7 @@ import java.util.Locale;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @RestController
-@RequestMapping("/places")
+@RequestMapping("/v1/places")
 
 public class PlaceController {
     private static final Logger logger = LoggerFactory.getLogger(PlaceController.class);
