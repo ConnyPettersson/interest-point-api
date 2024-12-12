@@ -2,12 +2,8 @@ package com.example.interestpointapi.repositories;
 
 import com.example.interestpointapi.entities.Category;
 import com.example.interestpointapi.entities.Place;
-import org.geolatte.geom.G2D;
-import org.geolatte.geom.Geometry;
-import org.geolatte.geom.Point;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 

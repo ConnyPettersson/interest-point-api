@@ -11,6 +11,8 @@ import org.geolatte.geom.crs.CoordinateReferenceSystems;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -49,6 +51,10 @@ public class PlaceService {
 
     public List<Place> getAllPlaces() {
         return placeRepository.findAll();
+    }
+
+    public Page<Place> getAllPlaces(Pageable pageable) {
+        return placeRepository.findAll(pageable);
     }
 
     public Optional<Place> getPlaceById(Integer id) {

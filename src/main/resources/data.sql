@@ -11,6 +11,7 @@ VALUES ('user', '$2a$10$hashedpassword');
 INSERT INTO users (username, password)
 VALUES ('test_userX', 'test_password');
 
+
 -- Lägg in platser knutna till befintliga användare
 INSERT INTO place (name, category_id, user_id, is_private, description, coordinates)
 VALUES
@@ -18,6 +19,7 @@ VALUES
     ('New Place', 1, 1, FALSE, 'Description', ST_GeomFromText('POINT(10.0 30.0)', 4326)),
     ('Test Place', 1, 1, FALSE, 'Inside the polygon', ST_GeomFromText('POINT(-73.965 40.785)', 4326)),
     ('Test Place', 1, 1, FALSE, 'Inside polygon', ST_GeomFromText('POINT(-73.975 40.785)', 4326));
+
 
 -- Lägg in plats för test_userX
 INSERT INTO place (name, category_id, user_id, is_private, description, coordinates)

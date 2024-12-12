@@ -1,6 +1,6 @@
 USE interest_db;
 
--- Skapa tabeller
+
 CREATE TABLE IF NOT EXISTS category (
                                         id INT AUTO_INCREMENT PRIMARY KEY,
                                         name VARCHAR(100) NOT NULL UNIQUE,
@@ -27,6 +27,9 @@ CREATE TABLE IF NOT EXISTS place (
                                      FOREIGN KEY (category_id) REFERENCES category(id),
                                      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
 );
+
+
+
 
 -- Se till att alla koordinater har SRID = 4326
 UPDATE place

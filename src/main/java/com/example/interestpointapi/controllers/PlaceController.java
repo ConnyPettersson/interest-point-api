@@ -11,15 +11,15 @@ import com.example.interestpointapi.repositories.CategoryRepository;
 import com.example.interestpointapi.repositories.UserRepository;
 import com.example.interestpointapi.services.PlaceService;
 import org.geolatte.geom.crs.CoordinateReferenceSystems;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.geolatte.geom.Geometry;
-
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.security.Principal;
@@ -125,20 +125,17 @@ public class PlaceController {
             @RequestParam Double centerLon,
             @RequestParam Double radiusKm) {
 
-        // Validering
         if (centerLat == null || centerLon == null || radiusKm == null || radiusKm <= 0) {
             return ResponseEntity.badRequest().build();
         }
 
-        // Konvertera radius i km till grader lat/lon
         double latDegreePerKm = 1.0 / 111.0; // ca 1 grad per 111 km lat
         double lonDegreePerKm = 1.0 / (111.0 * Math.cos(Math.toRadians(centerLat)));
 
         double latRadiusDegrees = radiusKm * latDegreePerKm;
         double lonRadiusDegrees = radiusKm * lonDegreePerKm;
 
-        // Skapa polygonen utifrån N punkter
-        int numPoints = 32; // antal punkter för att approximera cirkeln
+        int numPoints = 32;
         StringBuilder wktBuilder = new StringBuilder("POLYGON((");
 
         for (int i = 0; i < numPoints; i++) {
@@ -151,7 +148,7 @@ public class PlaceController {
                 wktBuilder.append(", ");
             }
         }
-        // Avsluta polygonen genom att återgå till startpunkten
+
         wktBuilder.append(", ")
                 .append((centerLon + Math.cos(0) * lonRadiusDegrees)).append(" ")
                 .append((centerLat + Math.sin(0) * latRadiusDegrees))
@@ -164,7 +161,6 @@ public class PlaceController {
         return ResponseEntity.ok(places);
     }
 
-
     @GetMapping("/my-places")
     public ResponseEntity<List<Place>> getMyPlaces(Principal principal) {
         String username = principal.getName();
@@ -173,6 +169,15 @@ public class PlaceController {
                 .getId();
         List<Place> myPlaces = placeService.getPlacesByUserId(userId);
         return ResponseEntity.ok(myPlaces);
+    }
+
+    @GetMapping("/paged")
+    public ResponseEntity<Page<Place>> getAllPlacesPaged(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Page<Place> placePage = placeService.getAllPlaces(PageRequest.of(page, size));
+        return ResponseEntity.ok(placePage);
     }
 
 
@@ -199,8 +204,6 @@ public class PlaceController {
         Place savedPlace = placeService.savePlace(place);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedPlace);
     }
-
-
 
     @PutMapping("/{id}")
     public ResponseEntity<Place> updatePlace(
